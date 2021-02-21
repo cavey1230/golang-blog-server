@@ -9,10 +9,10 @@ import (
 )
 
 type User struct {
-	Id         int64
-	CreateTime string `xorm:"created"`
-	UpdateTime string `xorm:"updated"`
-	DeleteTime string `xorm:"deleted"`
+	Id         int64  `json:"id"`
+	CreateTime string `xorm:"created" json:"createTime"`
+	UpdateTime string `xorm:"updated" json:"updateTime"`
+	DeleteTime string `xorm:"deleted" json:"deleteTime"`
 	Username   string `xorm:"varchar(20) notnull" json:"username"`
 	Password   string `xorm:"varchar(20) notnull" json:"password"`
 	Role       int    `xorm:"int" json:"role"`
@@ -53,7 +53,7 @@ func GetUsers(pageSize int, pageNum int) []User {
 		pageSize = 10
 	}
 	offset := (pageNum - 1) * pageSize
-	err := Db.Limit(pageSize, offset).Find(&users)
+	err := Db.Select("username,create_time,role").Limit(pageSize, offset).Find(&users)
 	if err != nil {
 		return nil
 	}
@@ -96,4 +96,21 @@ func ScryptPw(password string) string {
 	}
 	fpw := base64.StdEncoding.EncodeToString(HashPw)
 	return fpw
+}
+
+//登录验证
+func CheckLogin(username string, password string) int {
+	var user User
+	_, _ = Db.Where("username=?", username).Get(&user)
+	if user.Id == 0 {
+		return errmsg.ERROR_USER_NOT_EXIST
+	}
+	fmt.Println(ScryptPw(password))
+	if ScryptPw(password) != user.Password {
+		return errmsg.ERROR_PASSWORD_WRONG
+	}
+	if user.Role == 1 {
+		return errmsg.ERROR_USERS_ROLE_ERROR
+	}
+	return errmsg.SUCCSE
 }
