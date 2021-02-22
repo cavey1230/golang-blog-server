@@ -10,7 +10,9 @@ import (
 
 func InitRouter() {
 	gin.SetMode(utils.AppMode)
-	engine := gin.Default()
+	engine := gin.New()
+	engine.Use(middleware.WriteLog())
+	engine.Use(gin.Recovery())
 
 	V1NeedAuth := engine.Group("/api/v1")
 	V1NeedAuth.Use(middleware.JwtToken())
@@ -26,6 +28,8 @@ func InitRouter() {
 		V1NeedAuth.POST("article/add", v1.AddArticle)
 		V1NeedAuth.PUT("article/:id", v1.EditArticle)
 		V1NeedAuth.DELETE("article/:id", v1.DeleteArticle)
+		// 上传接口
+		V1NeedAuth.POST("upload", v1.UpLoad)
 	}
 	V1Public := engine.Group("/api/v1/public")
 	{
