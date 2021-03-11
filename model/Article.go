@@ -12,6 +12,7 @@ type Article struct {
 	Desc     string `xorm:"varchar(200) notnull" json:"desc"`
 	Content  string `xorm:"longtext notnull" json:"content"`
 	Img      string `xorm:"varchar(20)" json:"img"`
+	Boutique string `xorm:"int notnull" json:"boutique"`
 }
 
 // 检查文章
@@ -42,6 +43,32 @@ func CreateArticle(data *Article) int {
 }
 
 // 获取文章列表
+func GetAllBoutiqueArticle(pageSize int, pageNum int) ([]Article, int64) {
+	var articles []Article
+	var whereSql = "boutique=1"
+	if pageSize == 0 {
+		pageSize = 10
+	}
+	offset := (pageNum - 1) * pageSize
+	err := Db.Table("article").
+		Select(
+			"article.`id`,"+
+				"category.`name`,"+
+				"article.`desc`,"+
+				"article.`img`,"+
+				"title,"+
+				"SUBSTR(content FROM 1 FOR 50) as content,"+
+				"article.`create_time`").
+		Join("INNER", "category", "article.cid = category.id").
+		Where(whereSql).Limit(pageSize, offset).Find(&articles)
+	total, _ := Db.Where(whereSql).Count(&Article{})
+	if err != nil {
+		return nil, -1
+	}
+	return articles, total
+}
+
+// 获取文章列表
 func GetAllArticle(pageSize int, pageNum int, cid int) ([]Article, int64) {
 	var articles []Article
 	var whereSql = ""
@@ -53,12 +80,18 @@ func GetAllArticle(pageSize int, pageNum int, cid int) ([]Article, int64) {
 	}
 	offset := (pageNum - 1) * pageSize
 	err := Db.Table("article").
-		Select("category.`name`,"+
-			"title,"+
-			"SUBSTR(content FROM 1 FOR 50) as content,"+
-			"article.`create_time`").
+		Select(
+			"article.`id`,"+
+				"category.`name`,"+
+				"article.`desc`,"+
+				"article.`img`,"+
+				"title,"+
+				"SUBSTR(content FROM 1 FOR 50) as content,"+
+				"article.`create_time`").
 		Join("INNER", "category", "article.cid = category.id").
-		Where(whereSql).Limit(pageSize, offset).Find(&articles)
+		Where(whereSql).Desc("article.`create_time`").
+		Limit(pageSize, offset).
+		Find(&articles)
 	total, _ := Db.Where(whereSql).Count(&Article{})
 	if err != nil {
 		return nil, -1

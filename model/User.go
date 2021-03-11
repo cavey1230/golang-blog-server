@@ -13,9 +13,9 @@ type User struct {
 	CreateTime string `xorm:"created" json:"createTime"`
 	UpdateTime string `xorm:"updated" json:"updateTime"`
 	DeleteTime string `xorm:"deleted" json:"deleteTime"`
-	Username   string `xorm:"varchar(20) notnull" json:"username"`
-	Password   string `xorm:"varchar(20) notnull" json:"password"`
-	Role       int    `xorm:"int" json:"role"`
+	Username   string `xorm:"varchar(20) notnull" json:"username" validate:"required,min=4,max=12" label:"用户名"`
+	Password   string `xorm:"varchar(20) notnull" json:"password" validate:"required,min=6,max=20" label:"密码"`
+	Role       int    `xorm:"int default 2" json:"role" validate:"required" label:"角色名"`
 	//Avatar string
 }
 
@@ -47,17 +47,18 @@ func CreateUser(data *User) int {
 }
 
 // 获取用户列表
-func GetUsers(pageSize int, pageNum int) []User {
+func GetUsers(pageSize int, pageNum int) ([]User, int64) {
 	var users []User
 	if pageSize == 0 {
 		pageSize = 10
 	}
 	offset := (pageNum - 1) * pageSize
 	err := Db.Select("username,create_time,role").Limit(pageSize, offset).Find(&users)
+	total, _ := Db.Count(&Category{})
 	if err != nil {
-		return nil
+		return nil, -1
 	}
-	return users
+	return users, total
 }
 
 //删除用户
@@ -109,7 +110,7 @@ func CheckLogin(username string, password string) int {
 	if ScryptPw(password) != user.Password {
 		return errmsg.ERROR_PASSWORD_WRONG
 	}
-	if user.Role == 1 {
+	if user.Role != 2 {
 		return errmsg.ERROR_USERS_ROLE_ERROR
 	}
 	return errmsg.SUCCSE

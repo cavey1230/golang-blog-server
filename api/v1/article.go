@@ -62,7 +62,39 @@ func GetAllArticles(context *gin.Context) {
 	//fmt.Println(pageSize,pageNum,cid)
 	article, total := model.GetAllArticle(pageSize, pageNum, cid)
 	if len(article) == 0 {
-		code = errmsg.ERROR_CATEGORY_PAGEINFO_ERROR
+		code = errmsg.ERROR_NO_ARITCLE
+	} else {
+		code = errmsg.SUCCSE
+	}
+	context.JSON(http.StatusOK, gin.H{
+		"status": code,
+		"data": DataObj{
+			Total:    total,
+			Articles: article,
+		},
+		"message": errmsg.GetErrMsg(code),
+	})
+}
+
+// 查询所有文章
+func GetAllBoutiqueArticles(context *gin.Context) {
+	var code int
+	type InFor struct {
+		PageSize string `form:"pageSize"`
+		PageNum  string `form:"pageNum"`
+	}
+	type DataObj struct {
+		Total    int64           `json:"total"`
+		Articles []model.Article `json:"articles"`
+	}
+	var inFor InFor
+	_ = context.ShouldBind(&inFor)
+	pageSize, _ := strconv.Atoi(inFor.PageSize)
+	pageNum, _ := strconv.Atoi(inFor.PageNum)
+	//fmt.Println(pageSize,pageNum,cid)
+	article, total := model.GetAllBoutiqueArticle(pageSize, pageNum)
+	if len(article) == 0 {
+		code = errmsg.ERROR_NO_BOUTIQUE_ARITCLE
 	} else {
 		code = errmsg.SUCCSE
 	}

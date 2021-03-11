@@ -5,6 +5,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"goblog/model"
 	"goblog/utils/errmsg"
+	"goblog/utils/myValidator"
 	"net/http"
 	"strconv"
 )
@@ -22,14 +23,23 @@ import (
 // 添加用户
 func AddUser(context *gin.Context) {
 	var user model.User
+	var code int
+	var msg string
 	_ = context.ShouldBindJSON(&user)
-	code := model.CheckUser(user.Username)
+	msg, code = myValidator.Validator(&user)
+	if code != errmsg.SUCCSE {
+		context.JSON(http.StatusOK, gin.H{
+			"status":  code,
+			"message": msg,
+		})
+		return
+	}
+	code = model.CheckUser(user.Username)
 	if code == errmsg.SUCCSE {
 		code = model.CreateUser(&user)
 	}
 	context.JSON(http.StatusOK, gin.H{
 		"status":  code,
-		"data":    user,
 		"message": errmsg.GetErrMsg(code),
 	})
 }
@@ -43,20 +53,27 @@ func GetUsers(context *gin.Context) {
 		PageSize string `form:"pageSize"`
 		PageNum  string `form:"pageNum"`
 	}
+	type DataObj struct {
+		Total int64        `json:"total"`
+		Users []model.User `json:"articles"`
+	}
 	var pageInFor PageInFor
 	_ = context.ShouldBind(&pageInFor)
 	pageSize, _ := strconv.Atoi(pageInFor.PageSize)
 	pageNum, _ := strconv.Atoi(pageInFor.PageNum)
 	fmt.Println(pageSize, pageNum)
-	users := model.GetUsers(pageSize, pageNum)
+	users, total := model.GetUsers(pageSize, pageNum)
 	if len(users) == 0 {
 		code = errmsg.ERROR_USERS_PAGEINFO_ERROR
 	} else {
 		code = errmsg.SUCCSE
 	}
 	context.JSON(http.StatusOK, gin.H{
-		"status":  code,
-		"data":    users,
+		"status": code,
+		"data": DataObj{
+			Total: total,
+			Users: users,
+		},
 		"message": errmsg.GetErrMsg(code),
 	})
 }

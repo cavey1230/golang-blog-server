@@ -34,20 +34,27 @@ func GetCategory(context *gin.Context) {
 		PageSize string `form:"pageSize"`
 		PageNum  string `form:"pageNum"`
 	}
+	type DataObj struct {
+		Total      int64            `json:"total"`
+		Categories []model.Category `json:"categories"`
+	}
 	var pageInFor PageInFor
 	_ = context.ShouldBind(&pageInFor)
 	pageSize, _ := strconv.Atoi(pageInFor.PageSize)
 	pageNum, _ := strconv.Atoi(pageInFor.PageNum)
 	fmt.Println(pageSize, pageNum)
-	category := model.GetCategory(pageSize, pageNum)
+	category, total := model.GetCategory(pageSize, pageNum)
 	if len(category) == 0 {
 		code = errmsg.ERROR_CATEGORY_PAGEINFO_ERROR
 	} else {
 		code = errmsg.SUCCSE
 	}
 	context.JSON(http.StatusOK, gin.H{
-		"status":  code,
-		"data":    category,
+		"status": code,
+		"data": DataObj{
+			Total:      total,
+			Categories: category,
+		},
 		"message": errmsg.GetErrMsg(code),
 	})
 }

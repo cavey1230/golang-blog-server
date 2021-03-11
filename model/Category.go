@@ -35,17 +35,18 @@ func CreateCategory(data *Category) int {
 }
 
 // 获取分类列表
-func GetCategory(pageSize int, pageNum int) []Category {
+func GetCategory(pageSize int, pageNum int) ([]Category, int64) {
 	var category []Category
 	if pageSize == 0 {
 		pageSize = 10
 	}
 	offset := (pageNum - 1) * pageSize
-	err := Db.Limit(pageSize, offset).Find(&category)
+	err := Db.Select("id,name").Limit(pageSize, offset).Find(&category)
+	total, _ := Db.Count(&Category{})
 	if err != nil {
-		return nil
+		return nil, -1
 	}
-	return category
+	return category, total
 }
 
 //删除分类

@@ -29,7 +29,7 @@ func InitDb() {
 		Db.SetMaxIdleConns(200)
 		Db.SetMaxOpenConns(200)
 		Db.SetMapper(names.GonicMapper{})
-		err := Db.Sync2(new(User), new(Article),new(Category))
+		err := Db.Sync2(new(User), new(Article), new(Category), new(Info), new(ToolsLink))
 		if err != nil {
 			fmt.Println("自动更新失败", err)
 		}

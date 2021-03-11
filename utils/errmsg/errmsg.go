@@ -17,8 +17,16 @@ const (
 	ERROR_CATEGORY_USED           = 2001
 	ERROR_CATEGORY_PAGEINFO_ERROR = 2002
 	//CODE = 3000...分类模块的错误
-	ERROR_ARTICLE_TITLE_USED = 3001
-	ERROR_ARTICLE_NOT_DEFINE = 3002
+	ERROR_ARTICLE_TITLE_USED  = 3001
+	ERROR_ARTICLE_NOT_DEFINE  = 3002
+	ERROR_NO_ARITCLE          = 3003
+	ERROR_NO_BOUTIQUE_ARITCLE = 3004
+	//CODE = 4000...个人信息模块的错误
+	ERROR_INFO_GET_ERROR = 4001
+	ERROR_INFO_NO_INFO   = 4002
+	//CODE = 5000...工具链接地址模块的错误
+	ERROR_TOOLSLINK_GET_ERROR  = 5001
+	ERROR_TOOLSLINK_EDIT_ERROR = 5002
 )
 
 var codeMsg = map[int]string{
@@ -38,8 +46,16 @@ var codeMsg = map[int]string{
 	ERROR_CATEGORY_USED:           "文章分类已占用",
 	ERROR_CATEGORY_PAGEINFO_ERROR: "暂无分类数据",
 	//CODE = 3000...分类模块的错误
-	ERROR_ARTICLE_TITLE_USED: "文章标题已占用",
-	ERROR_ARTICLE_NOT_DEFINE: "文章不存在",
+	ERROR_ARTICLE_TITLE_USED:  "文章标题已占用",
+	ERROR_ARTICLE_NOT_DEFINE:  "文章不存在",
+	ERROR_NO_ARITCLE:          "文章列表为空",
+	ERROR_NO_BOUTIQUE_ARITCLE: "精品文章列表为空",
+	//CODE = 4000...个人信息模块的错误
+	ERROR_INFO_GET_ERROR: "获取个人信息失败",
+	ERROR_INFO_NO_INFO:   "没有个人信息",
+	//CODE = 5000...工具链接地址模块的错误
+	ERROR_TOOLSLINK_GET_ERROR:  "工具链接地址获取错误",
+	ERROR_TOOLSLINK_EDIT_ERROR: "工具链接地址编辑错误",
 }
 
 func GetErrMsg(code int) string {
