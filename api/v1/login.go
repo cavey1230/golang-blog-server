@@ -26,3 +26,21 @@ func Login(context *gin.Context) {
 		"message": errmsg.GetErrMsg(code),
 	})
 }
+
+//后台登录验证
+func AdminLogin(context *gin.Context) {
+	var user model.User
+	var token string
+	var code int
+	_ = context.ShouldBindJSON(&user)
+	fmt.Println(user.Username, user.Password)
+	code = model.CheckAdminLogin(user.Username, user.Password)
+	if code == errmsg.SUCCSE {
+		token, code = middleware.SetToken(user.Username)
+	}
+	context.JSON(http.StatusOK, gin.H{
+		"status":  code,
+		"token":   token,
+		"message": errmsg.GetErrMsg(code),
+	})
+}

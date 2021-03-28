@@ -25,6 +25,48 @@ func GetOneInfo(context *gin.Context) {
 	})
 }
 
+// 模糊查询个人信息
+func FindInfo(context *gin.Context) {
+	var code int
+	type PageInFor struct {
+		PageSize   string `form:"pageSize"`
+		PageNum    string `form:"pageNum"`
+		FillString string `form:"fill_string"`
+		Image      string `form:"image"`
+		Name       string `form:"name"`
+		Wechat     string `form:"wechat"`
+		Address    string `form:"address"`
+		Checked    string `form:"checked"`
+	}
+	type DataObj struct {
+		Total int64        `json:"total"`
+		Data  []model.Info `json:"data"`
+	}
+	var pageInFor PageInFor
+	_ = context.ShouldBind(&pageInFor)
+	pageSize, _ := strconv.Atoi(pageInFor.PageSize)
+	pageNum, _ := strconv.Atoi(pageInFor.PageNum)
+	infos, total := model.FindInfo(
+		pageSize, pageNum,
+		pageInFor.FillString, pageInFor.Image,
+		pageInFor.Name, pageInFor.Wechat,
+		pageInFor.Address, pageInFor.Checked,
+	)
+	if len(infos) == 0 {
+		code = errmsg.ERROR_INFO_NO_INFO
+	} else {
+		code = errmsg.SUCCSE
+	}
+	context.JSON(http.StatusOK, gin.H{
+		"status": code,
+		"data": DataObj{
+			Total: total,
+			Data:  infos,
+		},
+		"message": errmsg.GetErrMsg(code),
+	})
+}
+
 // 查询所有个人信息
 func GetAllInfo(context *gin.Context) {
 	var code int
@@ -34,7 +76,7 @@ func GetAllInfo(context *gin.Context) {
 	}
 	type DataObj struct {
 		Total int64        `json:"total"`
-		Info  []model.Info `json:"infos"`
+		Data  []model.Info `json:"data"`
 	}
 	var inFor InFor
 	_ = context.ShouldBind(&inFor)
@@ -51,7 +93,7 @@ func GetAllInfo(context *gin.Context) {
 		"status": code,
 		"data": DataObj{
 			Total: total,
-			Info:  infos,
+			Data:  infos,
 		},
 		"message": errmsg.GetErrMsg(code),
 	})

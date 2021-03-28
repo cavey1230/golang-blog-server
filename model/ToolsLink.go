@@ -1,6 +1,9 @@
 package model
 
-import "goblog/utils/errmsg"
+import (
+	"fmt"
+	"goblog/utils/errmsg"
+)
 
 type ToolsLink struct {
 	Id         int64  `json:"id"`
@@ -13,6 +16,7 @@ type ToolsLink struct {
 	Introduce  string `xorm:"varchar(255) notnull" json:"introduce"`
 }
 
+// 查询单一工具链接
 func GetOneToolsLink(id int) (ToolsLink, int) {
 	var toolsLink ToolsLink
 	var code int
@@ -24,6 +28,7 @@ func GetOneToolsLink(id int) (ToolsLink, int) {
 	return toolsLink, code
 }
 
+// 创建工具链接
 func CreateToolsLink(data *ToolsLink) int {
 	var toolsLink = ToolsLink{
 		IconImg:   data.IconImg,
@@ -38,15 +43,44 @@ func CreateToolsLink(data *ToolsLink) int {
 	return errmsg.SUCCSE
 }
 
-func GetToolsLinkList() ([]ToolsLink, int) {
+// 模糊查询工具链接
+func FindToolsLink(pageSize int, pageNum int,
+	iconImg string, link string,
+	title string, introduce string) ([]ToolsLink, int64) {
 	var toolsLink []ToolsLink
-	err := Db.Limit(10, 0).Find(&toolsLink)
-	if err != nil {
-		return toolsLink, errmsg.ERROR
+	if pageSize == 0 {
+		pageSize = 10
 	}
-	return toolsLink, errmsg.SUCCSE
+	offset := (pageNum - 1) * pageSize
+	sql := fmt.Sprintf("icon_img Like %v%v%v ", "'%", iconImg, "%'")
+	sql += fmt.Sprintf("AND link  Like %v%v%v ", "'%", link, "%'")
+	sql += fmt.Sprintf("AND title  Like %v%v%v ", "'%", title, "%'")
+	sql += fmt.Sprintf("AND introduce  Like %v%v%v ", "'%", introduce, "%'")
+	fmt.Println(sql)
+	err := Db.Where(sql).Limit(pageSize, offset).Find(&toolsLink)
+	total, _ := Db.Where(sql).Count(&ToolsLink{})
+	if err != nil {
+		return nil, total
+	}
+	return toolsLink, total
 }
 
+// 查询所有工具链接
+func GetToolsLinkList(pageSize int, pageNum int) ([]ToolsLink, int64) {
+	var toolsLink []ToolsLink
+	if pageSize == 0 {
+		pageSize = 10
+	}
+	offset := (pageNum - 1) * pageSize
+	err := Db.Limit(pageSize, offset).Find(&toolsLink)
+	total, _ := Db.Count(&ToolsLink{})
+	if err != nil {
+		return toolsLink, total
+	}
+	return toolsLink, total
+}
+
+// 删除工具链接
 func DeleteToolsLink(id int) int {
 	var toolsLink ToolsLink
 	_, err := Db.ID(id).Delete(&toolsLink)
@@ -56,6 +90,7 @@ func DeleteToolsLink(id int) int {
 	return errmsg.SUCCSE
 }
 
+// 编辑工具链接
 func EditToolsLink(id int, data *ToolsLink) int {
 	var toolsLink = ToolsLink{
 		IconImg:   data.IconImg,

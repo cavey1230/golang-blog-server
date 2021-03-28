@@ -42,6 +42,48 @@ func GetOneArticle(context *gin.Context) {
 	})
 }
 
+// 模糊查询所有文章
+func FindAllArticles(context *gin.Context) {
+	var code int
+	type PageInFor struct {
+		PageSize string `form:"pageSize"`
+		PageNum  string `form:"pageNum"`
+		Title    string `form:"title"`
+		Cid      string `form:"cid"`
+		Synopsis string `form:"synopsis"`
+		Content  string `form:"content"`
+		Img      string `form:"img"`
+		Boutique string `form:"boutique"`
+	}
+	type DataObj struct {
+		Total int64           `json:"total"`
+		Data  []model.Article `json:"data"`
+	}
+	var pageInFor PageInFor
+	_ = context.ShouldBind(&pageInFor)
+	fmt.Println(pageInFor)
+	pageSize, _ := strconv.Atoi(pageInFor.PageSize)
+	pageNum, _ := strconv.Atoi(pageInFor.PageNum)
+	article, total := model.FindAllArticles(pageSize, pageNum,
+		pageInFor.Title, pageInFor.Cid,
+		pageInFor.Synopsis, pageInFor.Content,
+		pageInFor.Img, pageInFor.Boutique,
+	)
+	if len(article) == 0 {
+		code = errmsg.ERROR_NO_ARITCLE
+	} else {
+		code = errmsg.SUCCSE
+	}
+	context.JSON(http.StatusOK, gin.H{
+		"status": code,
+		"data": DataObj{
+			Total: total,
+			Data:  article,
+		},
+		"message": errmsg.GetErrMsg(code),
+	})
+}
+
 // 查询所有文章
 func GetAllArticles(context *gin.Context) {
 	var code int
@@ -51,8 +93,8 @@ func GetAllArticles(context *gin.Context) {
 		Cid      string `form:"cid"`
 	}
 	type DataObj struct {
-		Total    int64           `json:"total"`
-		Articles []model.Article `json:"articles"`
+		Total int64           `json:"total"`
+		Data  []model.Article `json:"data"`
 	}
 	var inFor InFor
 	_ = context.ShouldBind(&inFor)
@@ -69,8 +111,8 @@ func GetAllArticles(context *gin.Context) {
 	context.JSON(http.StatusOK, gin.H{
 		"status": code,
 		"data": DataObj{
-			Total:    total,
-			Articles: article,
+			Total: total,
+			Data:  article,
 		},
 		"message": errmsg.GetErrMsg(code),
 	})
@@ -84,8 +126,8 @@ func GetAllBoutiqueArticles(context *gin.Context) {
 		PageNum  string `form:"pageNum"`
 	}
 	type DataObj struct {
-		Total    int64           `json:"total"`
-		Articles []model.Article `json:"articles"`
+		Total int64           `json:"total"`
+		Data  []model.Article `json:"data"`
 	}
 	var inFor InFor
 	_ = context.ShouldBind(&inFor)
@@ -101,8 +143,8 @@ func GetAllBoutiqueArticles(context *gin.Context) {
 	context.JSON(http.StatusOK, gin.H{
 		"status": code,
 		"data": DataObj{
-			Total:    total,
-			Articles: article,
+			Total: total,
+			Data:  article,
 		},
 		"message": errmsg.GetErrMsg(code),
 	})
@@ -113,7 +155,7 @@ func EditArticle(context *gin.Context) {
 	id, _ := strconv.Atoi(context.Param("id"))
 	var article model.Article
 	_ = context.ShouldBindJSON(&article)
-	fmt.Println(article.Title)
+	fmt.Printf("%v", article)
 	code := model.CheckArticle(article.Title)
 	if code == errmsg.SUCCSE {
 		code = model.EditArticle(id, &article)

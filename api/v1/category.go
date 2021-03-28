@@ -25,7 +25,38 @@ func AddCategory(context *gin.Context) {
 	})
 }
 
-// 查询单个分类
+// 模糊查询分类
+func FindCategory(context *gin.Context) {
+	var code int
+	type PageInFor struct {
+		PageSize string `form:"pageSize"`
+		PageNum  string `form:"pageNum"`
+		Name     string `form:"name"`
+	}
+	type DataObj struct {
+		Total int64            `json:"total"`
+		Data  []model.Category `json:"data"`
+	}
+	var pageInFor PageInFor
+	_ = context.ShouldBind(&pageInFor)
+	pageSize, _ := strconv.Atoi(pageInFor.PageSize)
+	pageNum, _ := strconv.Atoi(pageInFor.PageNum)
+	fmt.Println(pageSize, pageNum)
+	category, total := model.FindCategory(pageSize, pageNum, pageInFor.Name)
+	if len(category) == 0 {
+		code = errmsg.ERROR_CATEGORY_PAGEINFO_ERROR
+	} else {
+		code = errmsg.SUCCSE
+	}
+	context.JSON(http.StatusOK, gin.H{
+		"status": code,
+		"data": DataObj{
+			Total: total,
+			Data:  category,
+		},
+		"message": errmsg.GetErrMsg(code),
+	})
+}
 
 // 查询用户分类
 func GetCategory(context *gin.Context) {
@@ -35,8 +66,8 @@ func GetCategory(context *gin.Context) {
 		PageNum  string `form:"pageNum"`
 	}
 	type DataObj struct {
-		Total      int64            `json:"total"`
-		Categories []model.Category `json:"categories"`
+		Total int64            `json:"total"`
+		Data  []model.Category `json:"data"`
 	}
 	var pageInFor PageInFor
 	_ = context.ShouldBind(&pageInFor)
@@ -52,9 +83,25 @@ func GetCategory(context *gin.Context) {
 	context.JSON(http.StatusOK, gin.H{
 		"status": code,
 		"data": DataObj{
-			Total:      total,
-			Categories: category,
+			Total: total,
+			Data:  category,
 		},
+		"message": errmsg.GetErrMsg(code),
+	})
+}
+
+// 查询用户分类
+func GetAllCategory(context *gin.Context) {
+	var code int
+	category := model.GetAllCategory()
+	if len(category) == 0 {
+		code = errmsg.ERROR_CATEGORY_PAGEINFO_ERROR
+	} else {
+		code = errmsg.SUCCSE
+	}
+	context.JSON(http.StatusOK, gin.H{
+		"status":  code,
+		"data":    category,
 		"message": errmsg.GetErrMsg(code),
 	})
 }

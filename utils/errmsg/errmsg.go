@@ -27,6 +27,12 @@ const (
 	//CODE = 5000...工具链接地址模块的错误
 	ERROR_TOOLSLINK_GET_ERROR  = 5001
 	ERROR_TOOLSLINK_EDIT_ERROR = 5002
+	//CODE = 6000...友情链接地址模块的错误
+	ERROR_BLOGROLL_GET_ERROR  = 6001
+	ERROR_BLOGROLL_EDIT_ERROR = 6002
+	//CODE = 7000...版权信息地址模块的错误
+	ERROR_COPYRIGHT_GET_ERROR  = 7001
+	ERROR_COPYRIGHT_EDIT_ERROR = 7002
 )
 
 var codeMsg = map[int]string{
@@ -56,6 +62,12 @@ var codeMsg = map[int]string{
 	//CODE = 5000...工具链接地址模块的错误
 	ERROR_TOOLSLINK_GET_ERROR:  "工具链接地址获取错误",
 	ERROR_TOOLSLINK_EDIT_ERROR: "工具链接地址编辑错误",
+	//CODE = 6000...友情链接地址模块的错误
+	ERROR_BLOGROLL_GET_ERROR:  "友情链接获取错误",
+	ERROR_BLOGROLL_EDIT_ERROR: "友情链接编辑错误",
+	//CODE = 7000...版权信息模块的错误
+	ERROR_COPYRIGHT_GET_ERROR:  "版权信息获取错误",
+	ERROR_COPYRIGHT_EDIT_ERROR: "版权信息编辑错误",
 }
 
 func GetErrMsg(code int) string {

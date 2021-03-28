@@ -44,7 +44,40 @@ func AddUser(context *gin.Context) {
 	})
 }
 
-// 查询单个用户
+// 模糊查询用户
+func FindUser(context *gin.Context) {
+	var code int
+	type PageInFor struct {
+		PageSize string `form:"pageSize"`
+		PageNum  string `form:"pageNum"`
+		Username string `form:"username"`
+		Role     int    `form:"role"`
+	}
+	type DataObj struct {
+		Total int64        `json:"total"`
+		Data  []model.User `json:"data"`
+	}
+	var pageInFor PageInFor
+	_ = context.ShouldBind(&pageInFor)
+	pageSize, _ := strconv.Atoi(pageInFor.PageSize)
+	pageNum, _ := strconv.Atoi(pageInFor.PageNum)
+	fmt.Println(pageSize, pageNum)
+	users, total := model.FindUsers(pageSize,
+		pageNum, pageInFor.Username, pageInFor.Role)
+	if len(users) == 0 {
+		code = errmsg.ERROR_USER_NOT_EXIST
+	} else {
+		code = errmsg.SUCCSE
+	}
+	context.JSON(http.StatusOK, gin.H{
+		"status": code,
+		"data": DataObj{
+			Total: total,
+			Data:  users,
+		},
+		"message": errmsg.GetErrMsg(code),
+	})
+}
 
 // 查询用户列表
 func GetUsers(context *gin.Context) {
@@ -55,7 +88,7 @@ func GetUsers(context *gin.Context) {
 	}
 	type DataObj struct {
 		Total int64        `json:"total"`
-		Users []model.User `json:"articles"`
+		Data  []model.User `json:"data"`
 	}
 	var pageInFor PageInFor
 	_ = context.ShouldBind(&pageInFor)
@@ -72,7 +105,7 @@ func GetUsers(context *gin.Context) {
 		"status": code,
 		"data": DataObj{
 			Total: total,
-			Users: users,
+			Data:  users,
 		},
 		"message": errmsg.GetErrMsg(code),
 	})

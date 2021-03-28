@@ -1,6 +1,7 @@
 package v1
 
 import (
+	"fmt"
 	"github.com/gin-gonic/gin"
 	"goblog/model"
 	"goblog/utils/errmsg"
@@ -21,19 +22,73 @@ func GetOneToolsLink(context *gin.Context) {
 	})
 }
 
-// 查询前十的工具链接地址
-func GetAllToolsLink(context *gin.Context) {
-	var toolsLinkList []model.ToolsLink
+// 模糊查询工具链接地址
+func FindToolsLink(context *gin.Context) {
 	var code int
-	toolsLinkList, code = model.GetToolsLinkList()
-	if code == errmsg.ERROR {
+	type PageInFor struct {
+		PageSize  string `form:"pageSize"`
+		PageNum   string `form:"pageNum"`
+		IconImg   string `form:"icon_img"`
+		Link      string `form:"link"`
+		Title     string `form:"title"`
+		Introduce string `form:"introduce"`
+	}
+	type DataObj struct {
+		Total int64             `json:"total"`
+		Data  []model.ToolsLink `json:"data"`
+	}
+	var pageInFor PageInFor
+	_ = context.ShouldBind(&pageInFor)
+	pageSize, _ := strconv.Atoi(pageInFor.PageSize)
+	pageNum, _ := strconv.Atoi(pageInFor.PageNum)
+	fmt.Println(pageSize, pageNum)
+	toolsLink, total := model.FindToolsLink(
+		pageSize, pageNum,
+		pageInFor.IconImg, pageInFor.Link,
+		pageInFor.Title, pageInFor.Introduce,
+	)
+	if len(toolsLink) == 0 {
 		code = errmsg.ERROR_TOOLSLINK_GET_ERROR
 	} else {
 		code = errmsg.SUCCSE
 	}
 	context.JSON(http.StatusOK, gin.H{
-		"status":  code,
-		"data":    toolsLinkList,
+		"status": code,
+		"data": DataObj{
+			Total: total,
+			Data:  toolsLink,
+		},
+		"message": errmsg.GetErrMsg(code),
+	})
+}
+
+// 分页查询工具链接地址
+func GetAllToolsLink(context *gin.Context) {
+	var code int
+	type PageInFor struct {
+		PageSize string `form:"pageSize"`
+		PageNum  string `form:"pageNum"`
+	}
+	type DataObj struct {
+		Total int64             `json:"total"`
+		Data  []model.ToolsLink `json:"data"`
+	}
+	var pageInFor PageInFor
+	_ = context.ShouldBind(&pageInFor)
+	pageSize, _ := strconv.Atoi(pageInFor.PageSize)
+	pageNum, _ := strconv.Atoi(pageInFor.PageNum)
+	toolsLinkList, total := model.GetToolsLinkList(pageSize, pageNum)
+	if len(toolsLinkList) == 0 {
+		code = errmsg.ERROR_TOOLSLINK_GET_ERROR
+	} else {
+		code = errmsg.SUCCSE
+	}
+	context.JSON(http.StatusOK, gin.H{
+		"status": code,
+		"data": DataObj{
+			Total: total,
+			Data:  toolsLinkList,
+		},
 		"message": errmsg.GetErrMsg(code),
 	})
 }

@@ -16,7 +16,7 @@ type User struct {
 	Username   string `xorm:"varchar(20) notnull" json:"username" validate:"required,min=4,max=12" label:"用户名"`
 	Password   string `xorm:"varchar(20) notnull" json:"password" validate:"required,min=6,max=20" label:"密码"`
 	Role       int    `xorm:"int default 2" json:"role" validate:"required" label:"角色名"`
-	//Avatar string
+	Avatar     string `xorm:"varchar(100)" json:"avatar" validate:"max=100"  label:"头像地址"`
 }
 
 func CheckUser(username string) int {
@@ -34,6 +34,7 @@ func CreateUser(data *User) int {
 		Username: data.Username,
 		Password: data.Password,
 		Role:     data.Role,
+		//Avatar:   data.Avatar,
 	}
 	before := func(bean interface{}) {
 		user.Password = ScryptPw(user.Password)
@@ -53,10 +54,27 @@ func GetUsers(pageSize int, pageNum int) ([]User, int64) {
 		pageSize = 10
 	}
 	offset := (pageNum - 1) * pageSize
-	err := Db.Select("username,create_time,role").Limit(pageSize, offset).Find(&users)
-	total, _ := Db.Count(&Category{})
+	err := Db.Select("id,username,create_time,update_time,role").Limit(pageSize, offset).Find(&users)
+	total, _ := Db.Count(&User{})
 	if err != nil {
 		return nil, -1
+	}
+	return users, total
+}
+
+// 查询指定用户
+func FindUsers(pageSize int, pageNum int, username string, role int) ([]User, int64) {
+	var users []User
+	if pageSize == 0 {
+		pageSize = 10
+	}
+	offset := (pageNum - 1) * pageSize
+	sql := fmt.Sprintf("username Like %v%v%v ", "'%", username, "%'")
+	sql = fmt.Sprintf("%v And role Like %v%v%v ", sql, "'%", role, "%'")
+	err := Db.Where(sql).Limit(pageSize, offset).Find(&users)
+	total, _ := Db.Where(sql).Count(&User{})
+	if err != nil {
+		return nil, total
 	}
 	return users, total
 }
@@ -111,6 +129,22 @@ func CheckLogin(username string, password string) int {
 		return errmsg.ERROR_PASSWORD_WRONG
 	}
 	if user.Role != 2 {
+		return errmsg.ERROR_USERS_ROLE_ERROR
+	}
+	return errmsg.SUCCSE
+}
+
+//后台管理员认证
+func CheckAdminLogin(username string, password string) int {
+	var user User
+	_, _ = Db.Where("username=? And role = 3", username).Get(&user)
+	if user.Id == 0 {
+		return errmsg.ERROR_USER_NOT_EXIST
+	}
+	if ScryptPw(password) != user.Password {
+		return errmsg.ERROR_PASSWORD_WRONG
+	}
+	if user.Role != 3 {
 		return errmsg.ERROR_USERS_ROLE_ERROR
 	}
 	return errmsg.SUCCSE

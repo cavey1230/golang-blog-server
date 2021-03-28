@@ -1,7 +1,9 @@
 package model
 
 import (
+	"fmt"
 	"goblog/utils/errmsg"
+	"strconv"
 )
 
 type Category struct {
@@ -10,6 +12,11 @@ type Category struct {
 	UpdateTime string `xorm:"updated" json:"updateTime"`
 	DeleteTime string `xorm:"deleted" json:"deleteTime"`
 	Name       string `xorm:"varchar(20) notnull" json:"name"`
+}
+
+type Data struct {
+	Label string `json:"label"`
+	Value string `json:"value"`
 }
 
 // 检查分类
@@ -34,6 +41,22 @@ func CreateCategory(data *Category) int {
 	return errmsg.SUCCSE
 }
 
+// 模糊查询指定分类
+func FindCategory(pageSize int, pageNum int, name string) ([]Category, int64) {
+	var category []Category
+	if pageSize == 0 {
+		pageSize = 10
+	}
+	offset := (pageNum - 1) * pageSize
+	sql := fmt.Sprintf("name Like %v%v%v ", "'%", name, "%'")
+	err := Db.Where(sql).Limit(pageSize, offset).Find(&category)
+	total, _ := Db.Where(sql).Count(&Category{})
+	if err != nil {
+		return nil, total
+	}
+	return category, total
+}
+
 // 获取分类列表
 func GetCategory(pageSize int, pageNum int) ([]Category, int64) {
 	var category []Category
@@ -41,12 +64,29 @@ func GetCategory(pageSize int, pageNum int) ([]Category, int64) {
 		pageSize = 10
 	}
 	offset := (pageNum - 1) * pageSize
-	err := Db.Select("id,name").Limit(pageSize, offset).Find(&category)
+	err := Db.Select("id,name,create_time,update_time").Limit(pageSize, offset).Find(&category)
 	total, _ := Db.Count(&Category{})
 	if err != nil {
 		return nil, -1
 	}
 	return category, total
+}
+
+// 获取所有分类
+func GetAllCategory() []Data {
+	var category []Category
+	err := Db.Select("id,name,create_time,update_time").Find(&category)
+	if err != nil {
+		return nil
+	}
+	var data []Data
+	for _, c := range category {
+		data = append(data, Data{
+			Label: c.Name,
+			Value: strconv.FormatInt(c.Id, 10),
+		})
+	}
+	return data
 }
 
 //删除分类
