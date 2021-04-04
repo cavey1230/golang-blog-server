@@ -19,6 +19,7 @@ type User struct {
 	Avatar     string `xorm:"varchar(100)" json:"avatar" validate:"max=100"  label:"头像地址"`
 }
 
+// 检查用户存在
 func CheckUser(username string) int {
 	var user User
 	_, _ = Db.Select("id").Where("username = ?", username).Get(&user)
@@ -118,20 +119,20 @@ func ScryptPw(password string) string {
 }
 
 //登录验证
-func CheckLogin(username string, password string) int {
+func CheckLogin(username string, password string) (int64,int) {
 	var user User
 	_, _ = Db.Where("username=?", username).Get(&user)
 	if user.Id == 0 {
-		return errmsg.ERROR_USER_NOT_EXIST
+		return 0, errmsg.ERROR_USER_NOT_EXIST
 	}
 	fmt.Println(ScryptPw(password))
 	if ScryptPw(password) != user.Password {
-		return errmsg.ERROR_PASSWORD_WRONG
+		return 0,errmsg.ERROR_PASSWORD_WRONG
 	}
 	if user.Role != 2 {
-		return errmsg.ERROR_USERS_ROLE_ERROR
+		return 0,errmsg.ERROR_USERS_ROLE_ERROR
 	}
-	return errmsg.SUCCSE
+	return user.Id,errmsg.SUCCSE
 }
 
 //后台管理员认证

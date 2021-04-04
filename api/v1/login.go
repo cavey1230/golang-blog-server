@@ -13,16 +13,16 @@ import (
 func Login(context *gin.Context) {
 	var user model.User
 	var token string
-	var code int
 	_ = context.ShouldBindJSON(&user)
 	fmt.Println(user.Username, user.Password)
-	code = model.CheckLogin(user.Username, user.Password)
+	id, code := model.CheckLogin(user.Username, user.Password)
 	if code == errmsg.SUCCSE {
 		token, code = middleware.SetToken(user.Username)
 	}
 	context.JSON(http.StatusOK, gin.H{
 		"status":  code,
 		"token":   token,
+		"id":      id,
 		"message": errmsg.GetErrMsg(code),
 	})
 }

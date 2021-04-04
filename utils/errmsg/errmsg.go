@@ -33,6 +33,15 @@ const (
 	//CODE = 7000...版权信息地址模块的错误
 	ERROR_COPYRIGHT_GET_ERROR  = 7001
 	ERROR_COPYRIGHT_EDIT_ERROR = 7002
+	//CODE = 8000...评论模块的错误
+	ERROR_COMMENT_FIND_ERROR   = 8001
+	ERROR_COMMENT_CREATE_ERROR = 8002
+	//CODE = 9000...回复模块的错误
+	ERROR_REPLY_FIND_ERROR   = 9001
+	ERROR_REPLY_CREATE_ERROR = 9002
+	//CODE = 10000...时间轴模块的错误
+	ERROR_TIMELINE_FIND_ERROR   = 10001
+	ERROR_TIMELINE_CREATE_ERROR = 10002
 )
 
 var codeMsg = map[int]string{
@@ -68,6 +77,15 @@ var codeMsg = map[int]string{
 	//CODE = 7000...版权信息模块的错误
 	ERROR_COPYRIGHT_GET_ERROR:  "版权信息获取错误",
 	ERROR_COPYRIGHT_EDIT_ERROR: "版权信息编辑错误",
+	//CODE = 8000...评论模块的错误
+	ERROR_COMMENT_FIND_ERROR:   "评论信息获取错误",
+	ERROR_COMMENT_CREATE_ERROR: "评论信息创建失败",
+	//CODE = 9000...评论模块的错误
+	ERROR_REPLY_FIND_ERROR:   "回复信息获取错误",
+	ERROR_REPLY_CREATE_ERROR: "回复信息创建失败",
+	//CODE = 10000...时间轴模块的错误
+	ERROR_TIMELINE_FIND_ERROR:   "时间轴获取错误",
+	ERROR_TIMELINE_CREATE_ERROR: "时间轴创建失败",
 }
 
 func GetErrMsg(code int) string {

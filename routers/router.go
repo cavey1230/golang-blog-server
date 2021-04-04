@@ -31,7 +31,6 @@ func InitRouter() {
 		V1NeedAuth.POST("article/add", v1.AddArticle)
 		V1NeedAuth.PUT("article/:id", v1.EditArticle)
 		V1NeedAuth.DELETE("article/:id", v1.DeleteArticle)
-		V1NeedAuth.GET("article/find", v1.FindAllArticles)
 		// 个人信息模块的路由接口
 		V1NeedAuth.POST("info/add", v1.AddInfo)
 		V1NeedAuth.PUT("info/:id", v1.EditInfo)
@@ -50,6 +49,16 @@ func InitRouter() {
 		V1NeedAuth.POST("copyright/add", v1.AddCopyright)
 		V1NeedAuth.PUT("copyright/:id", v1.EditCopyright)
 		V1NeedAuth.DELETE("copyright/:id", v1.DeleteCopyright)
+		// 评论模块的路由接口
+		V1NeedAuth.POST("comment/add", v1.AddComment)
+		V1NeedAuth.DELETE("comment/:id", v1.DeleteComment)
+		// 回复模块的路由接口
+		V1NeedAuth.POST("reply/add", v1.AddReply)
+		V1NeedAuth.DELETE("reply/:id", v1.DeleteReply)
+		// 时间轴的路由接口
+		V1NeedAuth.POST("timeline/add", v1.AddTimeline)
+		V1NeedAuth.PUT("timeline/:id", v1.EditTimeline)
+		V1NeedAuth.DELETE("timeline/:id", v1.DeleteTimeline)
 		// 上传接口
 		V1NeedAuth.POST("upload", v1.UpLoad)
 	}
@@ -64,6 +73,7 @@ func InitRouter() {
 		// 获取文章信息
 		V1Public.GET("article", v1.GetAllArticles)
 		V1Public.GET("article/:id", v1.GetOneArticle)
+		V1Public.GET("articleCategory/find", v1.FindAllArticles)
 		// 获取精品文章信息
 		V1Public.GET("boutique_article", v1.GetAllBoutiqueArticles)
 		// 获取个人信息
@@ -78,6 +88,12 @@ func InitRouter() {
 		// 获取版权信息
 		V1Public.GET("copyright", v1.GetAllCopyright)
 		V1Public.GET("copyright/:id", v1.GetOneCopyright)
+		// 获取评论信息
+		V1Public.GET("comment/find", v1.FindAllComment)
+		// 获取回复信息
+		V1Public.GET("reply/find", v1.FindAllReply)
+		// 获取时间轴
+		V1Public.GET("timeline/find", v1.FindAllTimeline)
 		// 登录注册
 		V1Public.POST("login", v1.Login)
 		V1Public.POST("admin_login", v1.AdminLogin)

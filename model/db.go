@@ -36,7 +36,11 @@ func InitDb() {
 			new(Info),
 			new(ToolsLink),
 			new(Blogroll),
-			new(Copyright))
+			new(Copyright),
+			new(Comment),
+			new(Reply),
+			new(Timeline),
+		)
 		if err != nil {
 			fmt.Println("自动更新失败", err)
 		}
